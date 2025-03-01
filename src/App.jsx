@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Camera from './components/CameraFrame';
 import { loadModel } from './model';
-import {getFoodName} from './getFoodName';
+import { getFoodName } from './getFoodName';
 import * as tf from '@tensorflow/tfjs';
 
 const App = () => {
@@ -29,11 +29,8 @@ const App = () => {
 
   const processImage = async (image) => {
     if (model && image) {
-      // Preprocess the image for the model input
-      const tensor = tf.browser.fromPixels(image)
-        .resizeNearestNeighbor([224, 224]) // Resize image to fit model's input
-        .toFloat() // Convert to float (required for TensorFlow)
-        .expandDims(0); // Add batch dimension
+      const imgElement = await loadImage(image);
+      const tensor = preprocessImg(imgElement);
 
       // Make the prediction
       const prediction = await model.predict(tensor).data();
@@ -45,6 +42,24 @@ const App = () => {
       const name = getFoodName(classIndex);
       setFoodName(name);
     }
+  };
+
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = src;
+      img.onload = () => resolve(img);
+      img.onerror = (err) => reject(err);
+    });
+  };
+
+  const preprocessImg = (image) => {
+    return tf.browser.fromPixels(image)
+      .resizeNearestNeighbor([224, 224]) // Resize the image to the input size required by the model
+      .expandDims() // Add a batch dimension
+      .toFloat() // Convert to float type (required for model input)
+      .div(tf.scalar(255)); // Normalize pixel values (assuming the model was trained on images scaled to 255)
   };
 
   return (
