@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react'; // If you're using React
-
+import react from '@vitejs/plugin-react'; 
+import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
-  plugins: [react()], // Include if using React
+  plugins: [react(), tailwindcss()], 
   server: {
     proxy: {
       '/tfhub': {
@@ -19,6 +19,7 @@ export default defineConfig({
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
+          
         }
       }
     }
